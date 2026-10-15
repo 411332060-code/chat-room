@@ -17,7 +17,7 @@ flowchart LR
   RS --> Demo[DemoRoomService<br/>階段一:記憶體 + 假使用者]
   RS --> Sb[SupabaseRoomService<br/>階段二]
   Sb --> Auth[Auth 匿名登入]
-  Sb --> DB[(Postgres messages / profiles)]
+  Sb --> DB[(Postgres chat_messages / chat_profiles)]
   Sb --> RT[Realtime<br/>Postgres Changes / Presence / Broadcast]
   UI --> Rules[src/rules<br/>parsePost 驗證與清理]
 ```
@@ -102,7 +102,7 @@ interface Message {
 
 - **資料庫把關**:前端檢查只是體貼使用者。發言者、暱稱、時間都由資料庫 trigger 填入;前端只被允許寫入 `id` 與 `content`;沒有人能修改或刪除訊息。
 - **RLS**:資料表啟用列級安全,只有已登入(含匿名)的身分能讀、能新增。
-- **頻率限制**:每人 10 秒內最多 5 則,兩則至少間隔 0.5 秒,由 `BEFORE INSERT` trigger 強制。
+- **頻率限制**:每人 10 秒內最多 5 則,兩則至少間隔 0.5 秒,由 `BEFORE INSERT` trigger(`chat_stamp_message`) 強制。
 - **內容清理**:伺服器端去除頭尾空白,並限制 1 到 500 字。
 - **XSS**:所有使用者內容只用 `textContent` 顯示,不使用 `innerHTML`。
 - **已知限制**:
@@ -113,6 +113,8 @@ interface Message {
 ## 10. 刻意不做
 
 登入與註冊、私訊與多房間、訊息編輯與刪除、圖片與檔案上傳、已讀回條、推播通知、管理員後台與檢舉。
+
+> 資料表名稱加 `chat_` 前綴(`chat_messages`、`chat_profiles`),避免與同一個 Supabase 專案裡的其他專案衝突。`messages` 在本文件中指 `chat_messages`。`profiles` 同理。
 
 ## 11. 資料夾結構
 
