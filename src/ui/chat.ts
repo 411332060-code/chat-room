@@ -56,6 +56,7 @@ export function startApp(root: HTMLElement, service: RoomService, modeLabel?: st
 
   function leaveToEntry(notice?: string) {
     chat = null
+    lastMembers = []
     void service.leave()
     showEntry(notice)
   }
@@ -77,7 +78,8 @@ export function startApp(root: HTMLElement, service: RoomService, modeLabel?: st
       try {
         const me = await service.connect()
         chat = createChat(root, service, me, () => leaveToEntry())
-        chat.setMembers(lastMembers)
+        // Until the first presence update arrives, at least show ourselves: "1", not "0".
+        chat.setMembers(lastMembers.length > 0 ? lastMembers : [me])
         await chat.loadInitial()
       } catch (e) {
         chat = null
@@ -129,7 +131,8 @@ function createChat(root: HTMLElement, service: RoomService, me: Me, onLeave: ()
   const form = el('form', 'composer')
   const input = el('textarea')
   input.rows = 1
-  input.placeholder = '說點什麼…(Enter 送出,Shift+Enter 換行)'
+  input.placeholder = '說點什麼…'
+  input.title = 'Enter 送出,Shift+Enter 換行'
   input.setAttribute('aria-label', '訊息')
   const sendBtn = el('button', undefined, '送出')
   sendBtn.type = 'submit'
