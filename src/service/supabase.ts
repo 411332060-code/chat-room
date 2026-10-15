@@ -59,6 +59,9 @@ export class SupabaseRoomService implements RoomService {
     let session = (await this.client.auth.getSession()).data.session
     if (!session) {
       const { data, error } = await this.client.auth.signInAnonymously()
+      if (error?.status === 429 || /rate limit/i.test(error?.message ?? '')) {
+        throw new Error('這個網路最近進入聊天室的次數太多,請等幾分鐘再試一次')
+      }
       if (error || !data.session) throw new Error(error?.message ?? '無法建立匿名身分')
       session = data.session
     }
