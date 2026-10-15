@@ -11,15 +11,27 @@
 
 ## 2. 架構圖
 
+三個角色:**瀏覽器**(執行畫面與 RoomService)、**GitHub Pages**(只負責送出靜態檔,不處理任何聊天資料)、**Supabase**(身分、資料、即時推送)。
+
 ```mermaid
 flowchart LR
-  UI[畫面 src/ui] --> RS{{RoomService 介面}}
-  RS --> Demo[DemoRoomService<br/>階段一:記憶體 + 假使用者]
-  RS --> Sb[SupabaseRoomService<br/>階段二]
-  Sb --> Auth[Auth 匿名登入]
-  Sb --> DB[(Postgres chat_messages / chat_profiles)]
-  Sb --> RT[Realtime<br/>Postgres Changes / Presence / Broadcast]
-  UI --> Rules[src/rules<br/>parsePost 驗證與清理]
+  Pages[GitHub Pages<br/>靜態檔 HTML / JS / CSS]
+  subgraph Browser[瀏覽器]
+    UI[畫面 src/ui] --> Rules[src/rules<br/>parsePost 與 isValidMessage]
+    UI --> RS{{RoomService 介面}}
+    RS --> Demo[DemoRoomService<br/>階段一:記憶體 + 假使用者]
+    RS --> Sb[SupabaseRoomService<br/>階段二]
+  end
+  subgraph Supabase
+    Auth[Auth 匿名登入]
+    DB[(Postgres<br/>chat_messages / chat_profiles<br/>RLS + trigger)]
+    RT[Realtime<br/>Postgres Changes / Presence / Broadcast]
+  end
+  Pages -- 載入網頁 --> Browser
+  Sb -- 取得匿名身分 --> Auth
+  Sb -- 讀取與新增訊息 --> DB
+  DB -- 新訊息推送 --> RT
+  RT <-- 即時訊息、在線名單、輸入中 --> Sb
 ```
 
 ## 3. 技術選擇與理由
@@ -72,9 +84,10 @@ interface Message {
 
 1. 進入畫面 → `connect()` 取得身分 → `loadRecent(50)` → 訂閱 `onMessage`、`onPresence`、`onTyping`。
 2. 送出 → `parsePost()` 驗證與清理 → 畫面先以 `sending` 顯示 → `send()` → 成功變 `sent`;失敗變 `failed`,按重試用同一個 id 再送。
-3. 收到訊息 → 以 id 去重 → 用 `textContent` 加入畫面。
+3. 收到別人的訊息 → **先用 `isValidMessage()` 檢查格式**(id 是 UUID、暱稱與內容是字串、內容 1 到 500 字、時間可解析),不合格就丟棄 → 以 id 去重 → 用 `textContent` 加入畫面。
 4. 輸入框有內容 → `setTyping(true)`,停止 3 秒後或送出後 `setTyping(false)`。
 5. 斷線 → `onConnection('reconnecting')` → 畫面顯示「重新連線中…」;超過 60 秒回到進入畫面。
+6. 離開 → 按「離開」或斷線太久 → `leave()` 關閉即時連線,線上名單對其他人更新並顯示離開提示;匿名身分保留在瀏覽器,下次進入暱稱不變。
 
 ## 7. 畫面清單
 

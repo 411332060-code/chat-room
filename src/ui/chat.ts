@@ -9,7 +9,7 @@ import {
   type Message,
   type RoomService,
 } from '../types'
-import { parsePost } from '../rules/parsePost'
+import { isValidMessage, parsePost } from '../rules/parsePost'
 
 type SendStatus = 'sending' | 'sent' | 'failed'
 
@@ -169,6 +169,8 @@ function createChat(root: HTMLElement, service: RoomService, me: Me, onLeave: ()
   }
 
   function addMessage(msg: Message, status?: SendStatus) {
+    // Our own pending message is built here and trusted; anything else is checked first.
+    if (!status && !isValidMessage(msg)) return
     const existing = items.get(msg.id)
     if (existing) {
       // Echo of a message already on screen (our own): just refresh the time.

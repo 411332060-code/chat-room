@@ -2,6 +2,8 @@
 
 不用登入的匿名聊天室,所有人在同一個聊天室裡。原生 TypeScript + Vite + Supabase。
 
+**線上版:https://411332060-code.github.io/chat-room/**(打開後按「進入聊天室」就能聊天,不用輸入任何東西)
+
 架構、安全設計與驗證清單見 [`docs/architecture.md`](docs/architecture.md)。
 
 ## 功能
