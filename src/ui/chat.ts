@@ -177,6 +177,8 @@ function createChat(root: HTMLElement, service: RoomService, me: Me, onLeave: ()
       const t = existing.li.querySelector('time')
       if (t) t.textContent = clock(msg.createdAt)
       existing.msg = msg
+      // The echo proves the message is stored, even if the HTTP reply has not come back yet.
+      if (existing.status?.classList.contains('sending')) setStatus(msg.id, 'sent')
       return
     }
     const own = msg.authorId === me.id
