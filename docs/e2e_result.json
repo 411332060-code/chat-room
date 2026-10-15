@@ -2,12 +2,12 @@
   "url": "https://411332060-code.github.io/chat-room/",
   "results": [
     {
-      "name": "A enters the chat room",
+      "name": "A enters the chat room as AIgraderA",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "B enters the chat room",
+      "name": "B enters the chat room as AIgraderB",
       "ok": true,
       "detail": ""
     },
@@ -29,17 +29,17 @@
     {
       "name": "B sees \"正在輸入…\" while A types",
       "ok": true,
-      "detail": "匿名海豚 186 正在輸入…"
+      "detail": "AIgraderA#930 正在輸入…"
     },
     {
       "name": "A -> B message arrives",
       "ok": true,
-      "detail": "23 ms"
+      "detail": "28 ms"
     },
     {
       "name": "B -> A message arrives",
       "ok": true,
-      "detail": "26 ms"
+      "detail": "42 ms"
     },
     {
       "name": "own message shows \"已送出\"",
@@ -84,10 +84,15 @@
     {
       "name": "messages flow again after reconnect",
       "ok": true,
-      "detail": "25 ms"
+      "detail": "20 ms"
     },
     {
-      "name": "C enters the chat room",
+      "name": "B sees A as \"AIgraderA#NNN\"",
+      "ok": true,
+      "detail": "AIgraderA#930"
+    },
+    {
+      "name": "C enters the chat room as AIgraderC",
       "ok": true,
       "detail": ""
     },
@@ -104,7 +109,7 @@
     {
       "name": "after reload: history is there and nickname unchanged",
       "ok": true,
-      "detail": "匿名海豚 186 -> 匿名海豚 186"
+      "detail": "AIgraderA#930 -> AIgraderA#930"
     },
     {
       "name": "B sees a leave notice after A leaves",
