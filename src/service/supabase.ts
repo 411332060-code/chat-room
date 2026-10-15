@@ -54,7 +54,7 @@ export class SupabaseRoomService implements RoomService {
     this.client = createClient(url, publishableKey)
   }
 
-  async connect(): Promise<Me> {
+  async connect(name?: string): Promise<Me> {
     // Anonymous identity: no screen, the browser keeps the session in localStorage.
     let session = (await this.client.auth.getSession()).data.session
     if (!session) {
@@ -63,7 +63,7 @@ export class SupabaseRoomService implements RoomService {
       session = data.session
     }
 
-    const { data: nickname, error } = await this.client.rpc('chat_join')
+    const { data: nickname, error } = await this.client.rpc('chat_join', { p_name: name ?? null })
     if (error) throw new Error(error.message)
 
     this.me = { id: session.user.id, nickname: nickname as string }

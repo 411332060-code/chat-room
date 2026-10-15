@@ -1,4 +1,4 @@
-import { MAX_LENGTH, type ChatErrorCode, type Message } from '../types'
+import { MAX_LENGTH, MAX_NAME_LENGTH, type ChatErrorCode, type Message } from '../types'
 
 export type ParseResult = { ok: true; content: string } | { ok: false; code: ChatErrorCode }
 
@@ -18,6 +18,16 @@ export function parsePost(raw: string): ParseResult {
   if (content.length === 0) return { ok: false, code: 'EMPTY' }
   if ([...content].length > MAX_LENGTH) return { ok: false, code: 'TOO_LONG' }
   return { ok: true, content }
+}
+
+/**
+ * Tidy a nickname the visitor typed. Returns null when nothing usable is left
+ * (the service then picks a random one). The database cleans it again.
+ */
+export function parseNickname(raw: string): string | null {
+  const name = raw.replace(INVISIBLE, '').replace(/\s+/g, ' ').trim()
+  const cut = [...name].slice(0, MAX_NAME_LENGTH).join('').trim()
+  return cut === '' ? null : cut
 }
 
 /** Check the shape of a message that arrived from someone else, before it is shown. */

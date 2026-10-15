@@ -32,7 +32,8 @@ export const ERROR_TEXT: Record<ChatErrorCode, string> = {
 
 /** The only thing the UI knows about the backend. See docs/architecture.md §4. */
 export interface RoomService {
-  connect(): Promise<Me>
+  /** `name` is an optional nickname suggestion; the service adds a fixed number to it. */
+  connect(name?: string): Promise<Me>
   loadRecent(limit: number): Promise<Message[]>
   /** Messages strictly older than `before` (a createdAt), oldest first. */
   loadOlder(before: string, limit: number): Promise<Message[]>
@@ -48,4 +49,5 @@ export interface RoomService {
 }
 
 export const MAX_LENGTH = 500
+export const MAX_NAME_LENGTH = 12
 export const PAGE_SIZE = 50

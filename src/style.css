@@ -66,6 +66,16 @@ button.online {
   max-width: 28em;
 }
 
+.entry input {
+  width: 100%;
+  max-width: 20em;
+  padding: 10px 12px;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+}
+
 .mode {
   padding: 4px 10px;
   font-size: 0.85rem;

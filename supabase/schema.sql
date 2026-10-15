@@ -20,9 +20,15 @@ create policy "read own profile" on public.chat_profiles
   for select to authenticated
   using (user_id = (select auth.uid()));
 
--- chat_join(): called on entry; creates the nickname the first time ----------------
+-- chat_join(name): called on entry. The visitor may suggest a name (up to 12 characters);
+-- the server cleans it and appends a fixed 3-digit number, e.g. "小明#924".
+-- No name given: a random one ("匿名貓咪#482") the first time, unchanged afterwards.
+-- The number stays the same for the same anonymous identity, so two people can use the
+-- same name and still be told apart.
 
-create or replace function public.chat_join()
+drop function if exists public.chat_join();   -- the earlier version without a parameter
+
+create or replace function public.chat_join(p_name text default null)
 returns text
 language plpgsql
 security definer
@@ -31,24 +37,40 @@ as $$
 declare
   uid     uuid := auth.uid();
   animals text[] := array['貓咪','水獺','企鵝','狐狸','柴犬','浣熊','無尾熊','刺蝟','海豚','兔子'];
+  cur     text;
+  clean   text;
+  num     text;
   nick    text;
 begin
   if uid is null then
     raise exception 'NOT_AUTHENTICATED';
   end if;
 
-  insert into public.chat_profiles (user_id, nickname)
-  values (uid, '匿名' || animals[1 + floor(random() * array_length(animals, 1))::int]
-               || ' ' || lpad(floor(random() * 1000)::int::text, 3, '0'))
-  on conflict (user_id) do nothing;
+  select p.nickname into cur from public.chat_profiles p where p.user_id = uid;
 
-  select p.nickname into nick from public.chat_profiles p where p.user_id = uid;
+  -- drop control / invisible characters, squash spaces, cut to 12 characters
+  clean := regexp_replace(coalesce(p_name, ''),
+             '[\u0001-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤﻿]', '', 'g');
+  clean := btrim(regexp_replace(clean, '\s+', ' ', 'g'));
+  clean := nullif(left(clean, 12), '');
+
+  if cur is null or clean is not null then
+    num  := coalesce(substring(cur from '(\d{3})$'), lpad(floor(random() * 1000)::int::text, 3, '0'));
+    nick := coalesce(clean, '匿名' || animals[1 + floor(random() * array_length(animals, 1))::int])
+            || '#' || num;
+
+    insert into public.chat_profiles (user_id, nickname) values (uid, nick)
+    on conflict (user_id) do update set nickname = excluded.nickname;
+  else
+    nick := cur;
+  end if;
+
   return nick;
 end;
 $$;
 
-revoke all on function public.chat_join() from public, anon;
-grant execute on function public.chat_join() to authenticated;
+revoke all on function public.chat_join(text) from public, anon;
+grant execute on function public.chat_join(text) to authenticated;
 
 -- Messages --------------------------------------------------------------------------
 

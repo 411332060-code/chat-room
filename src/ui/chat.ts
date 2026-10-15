@@ -2,6 +2,7 @@ import {
   ChatError,
   ERROR_TEXT,
   MAX_LENGTH,
+  MAX_NAME_LENGTH,
   PAGE_SIZE,
   type ConnectionState,
   type Me,
@@ -9,7 +10,7 @@ import {
   type Message,
   type RoomService,
 } from '../types'
-import { isValidMessage, parsePost } from '../rules/parsePost'
+import { isValidMessage, parseNickname, parsePost } from '../rules/parsePost'
 
 type SendStatus = 'sending' | 'sent' | 'failed'
 
@@ -65,10 +66,23 @@ export function startApp(root: HTMLElement, service: RoomService, modeLabel?: st
     root.replaceChildren()
     const box = el('main', 'entry')
     box.append(el('h1', undefined, '匿名聊天室'))
-    box.append(el('p', undefined, '不用登入,所有人都在同一個聊天室。你會拿到一個隨機暱稱。'))
+    box.append(el('p', undefined, '不用登入,所有人都在同一個聊天室。取個暱稱,系統會幫你加上編號;不填就給你一個隨機暱稱。'))
     if (modeLabel) box.append(el('p', 'mode', modeLabel))
     if (notice) box.append(el('p', 'notice-text', notice))
+    const nameInput = el('input')
+    nameInput.maxLength = MAX_NAME_LENGTH
+    nameInput.placeholder = '暱稱(可留空,會自動加上編號)'
+    nameInput.setAttribute('aria-label', '暱稱')
+    nameInput.autocomplete = 'off'
+    try {
+      nameInput.value = localStorage.getItem('chat-name') ?? ''
+    } catch {
+      // storage unavailable: start empty
+    }
     const button = el('button', undefined, '進入聊天室')
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) button.click()
+    })
     const error = el('p', 'error')
     error.hidden = true
     button.addEventListener('click', async () => {
@@ -76,7 +90,13 @@ export function startApp(root: HTMLElement, service: RoomService, modeLabel?: st
       button.textContent = '連線中…'
       error.hidden = true
       try {
-        const me = await service.connect()
+        const name = parseNickname(nameInput.value)
+        try {
+          localStorage.setItem('chat-name', name ?? '')
+        } catch {
+          // storage unavailable: just do not remember it
+        }
+        const me = await service.connect(name ?? undefined)
         chat = createChat(root, service, me, () => leaveToEntry())
         // Until the first presence update arrives, at least show ourselves: "1", not "0".
         chat.setMembers(lastMembers.length > 0 ? lastMembers : [me])
@@ -92,7 +112,7 @@ export function startApp(root: HTMLElement, service: RoomService, modeLabel?: st
         }
       }
     })
-    box.append(button, error)
+    box.append(nameInput, button, error)
     root.append(box)
   }
 

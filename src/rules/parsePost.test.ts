@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { isValidMessage, parsePost } from './parsePost'
+import { isValidMessage, parseNickname, parsePost } from './parsePost'
 
 test('trims whitespace and keeps text', () => {
   assert.deepEqual(parsePost('  hi  '), { ok: true, content: 'hi' })
@@ -53,4 +53,19 @@ test('isValidMessage rejects malformed messages', () => {
   assert.equal(isValidMessage({ ...ok, content: 'a'.repeat(501) }), false)
   assert.equal(isValidMessage({ ...ok, content: 42 }), false)
   assert.equal(isValidMessage({ ...ok, createdAt: 'yesterday' }), false)
+})
+test('parseNickname tidies a typed name', () => {
+  assert.equal(parseNickname('  AIgraderA  '), 'AIgraderA')
+  assert.equal(parseNickname('小  明'), '小 明')
+  assert.equal(parseNickname('a\u200Bb'), 'ab')
+})
+
+test('parseNickname returns null when nothing usable is left', () => {
+  assert.equal(parseNickname(''), null)
+  assert.equal(parseNickname('   '), null)
+  assert.equal(parseNickname('\u200B\uFEFF'), null)
+})
+
+test('parseNickname cuts to 12 characters', () => {
+  assert.equal(parseNickname('一二三四五六七八九十甲乙丙丁'), '一二三四五六七八九十甲乙')
 })

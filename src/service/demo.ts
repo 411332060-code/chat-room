@@ -11,9 +11,9 @@ import {
 // so every screen can be seen without a backend.
 
 const BOTS: Member[] = [
-  { id: 'bot-1', nickname: '匿名水獺 482' },
-  { id: 'bot-2', nickname: '匿名企鵝 107' },
-  { id: 'bot-3', nickname: '匿名柴犬 735' },
+  { id: 'bot-1', nickname: '匿名水獺#482' },
+  { id: 'bot-2', nickname: '匿名企鵝#107' },
+  { id: 'bot-3', nickname: '匿名柴犬#735' },
 ]
 
 const BOT_LINES = [
@@ -41,7 +41,7 @@ function pick<T>(items: T[]): T {
 export class DemoRoomService implements RoomService {
   private me: Me = {
     id: crypto.randomUUID(),
-    nickname: `匿名${pick(ANIMALS)} ${100 + Math.floor(Math.random() * 900)}`,
+    nickname: `匿名${pick(ANIMALS)}#${100 + Math.floor(Math.random() * 900)}`,
   }
   private history: Message[] = []
   private ids = new Set<string>()
@@ -71,7 +71,8 @@ export class DemoRoomService implements RoomService {
     }
   }
 
-  async connect(): Promise<Me> {
+  async connect(name?: string): Promise<Me> {
+    if (name) this.me = { ...this.me, nickname: `${name}#${this.me.nickname.slice(-3)}` }
     this.timers.push(window.setInterval(() => this.botChat(), 7000))
     this.timers.push(window.setInterval(() => this.botComeAndGo(), 20000))
     window.addEventListener('offline', () => this.emitConnection('reconnecting'))
