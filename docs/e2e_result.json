@@ -1,0 +1,127 @@
+{
+  "url": "https://411332060-code.github.io/chat-room/",
+  "results": [
+    {
+      "name": "A enters the chat room",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B enters the chat room",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A sees A and B online (at least 2)",
+      "ok": true,
+      "detail": "線上 2 人"
+    },
+    {
+      "name": "B sees A and B online (at least 2)",
+      "ok": true,
+      "detail": "線上 2 人"
+    },
+    {
+      "name": "A sees a join notice when B arrives",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B sees \"正在輸入…\" while A types",
+      "ok": true,
+      "detail": "匿名海豚 186 正在輸入…"
+    },
+    {
+      "name": "A -> B message arrives",
+      "ok": true,
+      "detail": "23 ms"
+    },
+    {
+      "name": "B -> A message arrives",
+      "ok": true,
+      "detail": "26 ms"
+    },
+    {
+      "name": "own message shows \"已送出\"",
+      "ok": true,
+      "detail": "已送出"
+    },
+    {
+      "name": "HTML is shown as text (not executed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "counter shows 501 / 500 and disables send",
+      "ok": true,
+      "detail": "501 / 500"
+    },
+    {
+      "name": "A (390px wide) has no horizontal scroll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B (390px wide) has no horizontal scroll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "6 quick messages: one is rejected with \"發言太快了\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "offline shows \"重新連線中…\" banner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "banner disappears after coming back online",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "messages flow again after reconnect",
+      "ok": true,
+      "detail": "25 ms"
+    },
+    {
+      "name": "C enters the chat room",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B sees the count drop by 1 when C leaves",
+      "ok": true,
+      "detail": "4 -> 線上 3 人"
+    },
+    {
+      "name": "B sees a leave notice for C",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after reload: history is there and nickname unchanged",
+      "ok": true,
+      "detail": "匿名海豚 186 -> 匿名海豚 186"
+    },
+    {
+      "name": "B sees a leave notice after A leaves",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "logs": {
+    "A": [
+      "Failed to load resource: the server responded with a status of 400 ()"
+    ],
+    "B": [
+      "Failed to load resource: the server responded with a status of 400 ()",
+      "Failed to load resource: the server responded with a status of 400 ()",
+      "Failed to load resource: the server responded with a status of 400 ()",
+      "Failed to load resource: the server responded with a status of 400 ()",
+      "Failed to load resource: the server responded with a status of 400 ()"
+    ]
+  }
+}

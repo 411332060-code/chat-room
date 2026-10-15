@@ -17,6 +17,17 @@
 - 斷線時顯示「重新連線中…」,超過 60 秒回到進入畫面
 - 資料庫端的頻率限制(10 秒最多 5 則)與內容清理
 
+## 畫面
+
+| 聊天(手機寬度) | 正在輸入 | 頻率限制 | 重新連線中 |
+|---|---|---|---|
+| ![聊天](docs/screenshots/phase2_chat.png) | ![輸入中](docs/screenshots/phase2_typing.png) | ![頻率限制](docs/screenshots/phase2_rate_limit.png) | ![重新連線](docs/screenshots/phase2_reconnecting.png) |
+
+線上名單:點頂部「線上 N 人」展開([截圖](docs/screenshots/phase2_online_list.png))。
+「載入更早的訊息」按鈕在聊天室累積超過 50 則時,出現在訊息清單最上方。
+
+端對端測試(兩到三個獨立瀏覽器對線上版實測)結果見 [`docs/e2e_result.json`](docs/e2e_result.json),腳本在 [`e2e/`](e2e/)。
+
 ## 兩種模式
 
 | | 展示模式 `demo` | 正式模式 `live` |
