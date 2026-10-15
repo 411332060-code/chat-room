@@ -69,7 +69,39 @@ export class SupabaseRoomService implements RoomService {
     this.me = { id: session.user.id, nickname: nickname as string }
     this.firstSyncDone = false
     this.openChannel(this.me)
+    this.watchBrowserConnection()
     return this.me
+  }
+
+  // The websocket does not drop the moment the network does (the heartbeat notices only
+  // after a while), so the browser's own online/offline events drive the banner as well.
+  private watching = false
+
+  private watchBrowserConnection() {
+    if (this.watching) return
+    this.watching = true
+
+    window.addEventListener('offline', () => {
+      if (this.channel) this.emitConnection('reconnecting')
+    })
+
+    window.addEventListener('online', () => {
+      if (!this.channel) return
+      // If the socket survived, we are back at once; otherwise supabase-js rejoins and the
+      // subscribe callback reports 'online'.
+      if (this.channel.state === 'joined') this.emitConnection('online')
+      void this.catchUp()
+    })
+  }
+
+  /** Re-read the latest messages after a gap; the screen drops the ones it already has. */
+  private async catchUp() {
+    try {
+      const recent = await this.loadRecent(50)
+      recent.forEach((m) => this.messageCbs.forEach((cb) => cb(m)))
+    } catch {
+      // Still offline or not ready; the next 'online' event tries again.
+    }
   }
 
   private openChannel(me: Me) {
