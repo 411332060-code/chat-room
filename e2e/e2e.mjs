@@ -24,9 +24,10 @@ for (const [k, p] of [['A', A], ['B', B]]) {
 
 async function enter(page, label) {
   await page.goto(SITE, { waitUntil: 'networkidle' })
+  await page.getByLabel('暱稱').fill(`AIgrader${label}`) // entry screen: pick a name, the server adds #NNN
   await page.getByRole('button', { name: '進入聊天室' }).click()
   await page.locator('textarea').waitFor({ timeout: 15000 })
-  record(`${label} enters the chat room`, true)
+  record(`${label} enters the chat room as AIgrader${label}`, true)
 }
 
 const bodyText = (page) => page.locator('.list').innerText()
@@ -40,7 +41,7 @@ try {
 
   await B.waitForFunction(() => /線上 2 人/.test(document.querySelector('button.online')?.textContent ?? ''), null, { timeout: 10000 }).catch(() => {})
   const onlineB = await B.locator('button.online').innerText()
-  const aSees2 = await A.waitForFunction(() => /線上 2 人/.test(document.querySelector('button.online')?.textContent ?? ''), null, { timeout: 10000 }).then(() => true, () => false)
+  const aSees2 = await A.waitForFunction(() => Number((document.querySelector('button.online')?.textContent ?? '').match(/線上 (\d+) 人/)?.[1]) >= 2, null, { timeout: 10000 }).then(() => true, () => false)
   record('A sees A and B online (at least 2)', aSees2, await A.locator('button.online').innerText())
   record('B sees A and B online (at least 2)', Number((onlineB.match(/線上 (\d+) 人/) ?? [])[1]) >= 2, onlineB)
   const joinNotice = await waitText(A, '加入了聊天室', 5000)
@@ -119,6 +120,10 @@ try {
     await A.locator('textarea').press('Enter')
     record('messages flow again after reconnect', await waitText(B, '[e2e] after reconnect', 10000), `${Date.now() - t0} ms`)
   }
+
+  // names: typed name + fixed 3-digit number, shown to the other side
+  const nameOnB = await B.locator('.msg', { hasText: '[e2e] hello from A' }).last().locator('.name').innerText()
+  record('B sees A as "AIgraderA#NNN"', /^AIgraderA#\d{3}$/.test(nameOnB), nameOnB)
 
   // a third person joins and leaves cleanly (button): B's list must follow, with notices
   const ctxC = await browser.newContext({ viewport: { width: 390, height: 780 } })

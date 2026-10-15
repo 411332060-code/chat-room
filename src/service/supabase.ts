@@ -221,6 +221,9 @@ export class SupabaseRoomService implements RoomService {
   async leave() {
     this.typers.forEach((t) => window.clearTimeout(t.timer))
     this.typers.clear()
+    // Say goodbye explicitly first: other people's lists update right away instead of
+    // waiting for the server to notice the channel closing.
+    await this.channel?.untrack().catch(() => undefined)
     await this.client.removeAllChannels() // the anonymous identity stays, so the nickname stays
     this.channel = null
   }
