@@ -81,6 +81,13 @@ export class SupabaseRoomService implements RoomService {
     if (this.watching) return
     this.watching = true
 
+    // Closing or reloading the tab: leave the channel now instead of waiting for the server
+    // to time the connection out, so we do not linger in everyone's online list.
+    window.addEventListener('pagehide', () => {
+      void this.channel?.untrack()
+      void this.client.removeAllChannels()
+    })
+
     window.addEventListener('offline', () => {
       if (this.channel) this.emitConnection('reconnecting')
     })
